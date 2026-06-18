@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Incident Analytics Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{--bg:#0a0e1a;--s:#111827;--s2:#1a2236;--s3:#1f2d45;--b:#2a3a55;--a:#3b82f6;--a2:#8b5cf6;--g:#10b981;--r:#ef4444;--o:#f59e0b;--c:#06b6d4;--t:#f1f5f9;--t2:#94a3b8;--t3:#64748b;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--t);font-family:var(--sans);min-height:100vh;}
+header{background:var(--s);border-bottom:1px solid var(--b);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--a),var(--a2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.logo-text{font-size:17px;font-weight:800;}.logo-text span{color:var(--a);}
+.live{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--g);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:bl 1.5s infinite;}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0.2}}
+.btn{padding:8px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;font-family:var(--sans);}
+.btn-p{background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(59,130,246,0.4);}
+.btn-s{background:var(--s2);color:var(--t2);border:1px solid var(--b);}
+.btn-s:hover{color:var(--t);border-color:var(--a);}
+.btn-g{background:rgba(16,185,129,0.12);color:var(--g);border:1px solid rgba(16,185,129,0.3);}
+#fileInput{display:none;}
+/* UPLOAD */
+.upload{margin:28px;border:2px dashed var(--b);border-radius:14px;padding:44px;text-align:center;cursor:pointer;transition:all 0.3s;background:var(--s);}
+.upload:hover{border-color:var(--a);background:rgba(59,130,246,0.04);}
+.upload h2{font-size:20px;font-weight:700;margin:12px 0 8px;}
+.upload p{color:var(--t2);font-size:13px;margin-bottom:20px;}
+.upload-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.feat{margin:0 28px 28px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.fc{background:var(--s);border:1px solid var(--b);border-radius:11px;padding:18px;text-align:center;}
+.fc .fi{font-size:26px;margin-bottom:8px;}
+.fc h4{font-size:12px;font-weight:600;margin-bottom:4px;}
+.fc p{font-size:11px;color:var(--t2);}
+/* DASHBOARD */
+#dash{display:none;padding:22px 28px 44px;}
+.dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.dt{font-size:20px;font-weight:700;}.dt span{color:var(--a);}
+.ds{font-size:12px;color:var(--t2);margin-top:3px;}
+.da{display:flex;gap:8px;}
+.kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:20px;}
+.kc{background:var(--s);border:1px solid var(--b);border-radius:11px;padding:18px 14px;position:relative;overflow:hidden;transition:transform 0.2s;}
+.kc:hover{transform:translateY(-2px);}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kc.bl::before{background:var(--a)}.kc.gr::before{background:var(--g)}.kc.rd::before{background:var(--r)}.kc.or::before{background:var(--o)}.kc.pu::before{background:var(--a2)}.kc.cy::before{background:var(--c)}
+.kl{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;}
+.kv{font-size:30px;font-weight:800;font-family:var(--mono);}
+.kv.bl{color:var(--a)}.kv.gr{color:var(--g)}.kv.rd{color:var(--r)}.kv.or{color:var(--o)}.kv.pu{color:var(--a2)}.kv.cy{color:var(--c)}
+.ks{font-size:11px;color:var(--t3);margin-top:3px;}
+.sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sl::after{content:'';flex:1;height:1px;background:var(--b);}
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+.ic{background:var(--s);border:1px solid var(--b);border-radius:11px;padding:14px 18px;border-left:3px solid var(--a);}
+.ic.w{border-left-color:var(--o)}.ic.d{border-left-color:var(--r)}.ic.g{border-left-color:var(--g)}
+.ii{font-size:18px;margin-bottom:6px;}.it{font-size:12px;font-weight:600;margin-bottom:3px;}.ix{font-size:11px;color:var(--t2);line-height:1.5;}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.cg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px;}
+.cc{background:var(--s);border:1px solid var(--b);border-radius:11px;padding:18px;}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.ct{font-size:13px;font-weight:600;}
+.cb{font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600;font-family:var(--mono);}
+.cw{position:relative;height:210px;}
+.tc{background:var(--s);border:1px solid var(--b);border-radius:11px;overflow:hidden;margin-bottom:18px;}
+.th{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;background:var(--s2);}
+.tt{font-size:13px;font-weight:600;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 14px;font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:0.06em;text-align:left;background:var(--s2);border-bottom:1px solid var(--b);}
+tbody tr{border-bottom:1px solid var(--b);transition:background 0.15s;}
+tbody tr:hover{background:var(--s2);}
+tbody tr:last-child{border-bottom:none;}
+tbody td{padding:10px 14px;font-size:12px;}
+.bg{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;font-family:var(--mono);text-transform:uppercase;}
+.bp1{background:rgba(239,68,68,0.15);color:var(--r)}.bp2{background:rgba(245,158,11,0.15);color:var(--o)}.bp3{background:rgba(59,130,246,0.15);color:var(--a)}.bp4{background:rgba(148,163,184,0.15);color:var(--t2)}
+.bop{background:rgba(245,158,11,0.15);color:var(--o)}.bpr{background:rgba(59,130,246,0.15);color:var(--a)}.brs{background:rgba(16,185,129,0.15);color:var(--g)}
+.bbr{background:rgba(239,68,68,0.15);color:var(--r)}.bok{background:rgba(16,185,129,0.15);color:var(--g)}.brk{background:rgba(245,158,11,0.15);color:var(--o)}
+.rbr{background:rgba(239,68,68,0.04)!important;}
+.pw{display:flex;align-items:center;gap:7px;}.pb{flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden;}.pf{height:100%;border-radius:3px;}.pl{font-size:11px;font-family:var(--mono);min-width:32px;text-align:right;}
+.lo{display:none;position:fixed;inset:0;background:rgba(10,14,26,0.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+.lo.on{display:flex;}.sp{width:44px;height:44px;border:3px solid var(--b);border-top-color:var(--a);border-radius:50%;animation:sp 0.8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.lt{color:var(--t2);font-size:15px;}
+footer{border-top:1px solid var(--b);padding:18px 28px;text-align:center;color:var(--t3);font-size:12px;}
+footer a{color:var(--a);text-decoration:none;}
+select{background:var(--s2);border:1px solid var(--b);color:var(--t);padding:4px 8px;border-radius:6px;font-size:11px;}
+@media(max-width:1100px){.kpi{grid-template-columns:repeat(3,1fr)}.cg,.cg3{grid-template-columns:1fr}.ig{grid-template-columns:1fr}}
+@media(max-width:700px){.kpi{grid-template-columns:repeat(2,1fr)}.feat{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="lo" id="lo"><div class="sp"></div><div class="lt" id="lt">Analyzing...</div></div>
+<header>
+  <div class="logo"><div class="logo-icon">📊</div><div class="logo-text">Incident <span>Analytics</span> Platform</div></div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="live"><div class="dot"></div>Live Analysis</div>
+    <button class="btn btn-s" onclick="resetDash()" id="resetBtn" style="display:none;font-size:12px;padding:6px 14px;">↩ New File</button>
+  </div>
+</header>
+
+<div id="up">
+  <div class="upload" ondragover="event.preventDefault();this.style.borderColor='var(--a)'" ondragleave="this.style.borderColor=''" ondrop="event.preventDefault();this.style.borderColor='';dropF(event)" onclick="document.getElementById('fileInput').click()">
+    <div style="font-size:44px">📂</div>
+    <h2>Upload Your Incident / Ticket Data</h2>
+    <p>Drag & drop your CSV file · Works with JIRA, ServiceNow, Zendesk, Freshdesk exports</p>
+    <div class="upload-btns" onclick="event.stopPropagation()">
+      <button class="btn btn-p" onclick="document.getElementById('fileInput').click()">📁 Upload CSV</button>
+      <button class="btn btn-g" onclick="loadSample('mixed')">🎯 Mixed Industries Sample</button>
+      <button class="btn btn-s" onclick="loadSample('healthcare')">🏥 Healthcare Sample</button>
+      <button class="btn btn-s" onclick="loadSample('banking')">🏦 Banking Sample</button>
+    </div>
+    <div style="margin-top:14px;font-size:11px;color:var(--t3)">Supports: JIRA exports · ServiceNow · Zendesk · Any CSV with ticket data</div>
+    <input type="file" id="fileInput" accept=".csv,.txt" onchange="handleFile(event)"/>
+  </div>
+  <div class="feat">
+    <div class="fc"><div class="fi">🔍</div><h4>Auto Detection</h4><p>Reads JIRA, ServiceNow, Zendesk formats automatically</p></div>
+    <div class="fc"><div class="fi">📈</div><h4>Trend Analysis</h4><p>Monthly ticket volume and resolution trends</p></div>
+    <div class="fc"><div class="fi">⚠️</div><h4>SLA Breach Detector</h4><p>Highlights breached and at-risk tickets</p></div>
+    <div class="fc"><div class="fi">👥</div><h4>Team Analytics</h4><p>Assignee performance and resolution rates</p></div>
+  </div>
+</div>
+
+<div id="dash">
+  <div class="dh">
+    <div><div class="dt">Incident <span>Analytics</span> Dashboard</div><div class="ds" id="ds"></div></div>
+    <div class="da"><button class="btn btn-s" onclick="exportCSV()" style="font-size:12px;padding:6px 14px;">📄 Export CSV</button><button class="btn btn-p" onclick="resetDash()" style="font-size:12px;padding:6px 14px;">↩ New File</button></div>
+  </div>
+  <div class="kpi">
+    <div class="kc bl"><div class="kl">Total Tickets</div><div class="kv bl" id="k1">0</div><div class="ks">All records</div></div>
+    <div class="kc gr"><div class="kl">Resolved</div><div class="kv gr" id="k2">0</div><div class="ks" id="k2s"></div></div>
+    <div class="kc or"><div class="kl">Open / In Progress</div><div class="kv or" id="k3">0</div><div class="ks">Awaiting resolution</div></div>
+    <div class="kc rd"><div class="kl">SLA Issues</div><div class="kv rd" id="k4">0</div><div class="ks" id="k4s"></div></div>
+    <div class="kc pu"><div class="kl">P1 Critical</div><div class="kv pu" id="k5">0</div><div class="ks">Highest priority</div></div>
+    <div class="kc cy"><div class="kl">Avg Resolution</div><div class="kv cy" id="k6">0h</div><div class="ks">Mean time to resolve</div></div>
+  </div>
+  <div class="sl">🧠 AI Insights</div>
+  <div class="ig" id="ig"></div>
+  <div class="sl">📈 Trend Analysis</div>
+  <div class="cg">
+    <div class="cc"><div class="ch"><div class="ct">📅 Monthly Ticket Volume</div><span class="cb" style="background:rgba(59,130,246,0.1);color:var(--a)">TREND</span></div><div class="cw"><canvas id="c1"></canvas></div></div>
+    <div class="cc"><div class="ch"><div class="ct">🎯 Priority Distribution</div><span class="cb" style="background:rgba(139,92,246,0.1);color:var(--a2)">PRIORITY</span></div><div class="cw"><canvas id="c2"></canvas></div></div>
+  </div>
+  <div class="cg3">
+    <div class="cc"><div class="ch"><div class="ct">📊 Status Breakdown</div><span class="cb" style="background:rgba(16,185,129,0.1);color:var(--g)">STATUS</span></div><div class="cw"><canvas id="c3"></canvas></div></div>
+    <div class="cc"><div class="ch"><div class="ct">⏱️ SLA Performance</div><span class="cb" style="background:rgba(239,68,68,0.1);color:var(--r)">SLA</span></div><div class="cw"><canvas id="c4"></canvas></div></div>
+    <div class="cc"><div class="ch"><div class="ct">📋 Issue Type Split</div><span class="cb" style="background:rgba(6,182,212,0.1);color:var(--c)">TYPE</span></div><div class="cw"><canvas id="c5"></canvas></div></div>
+  </div>
+  <div class="sl">👥 Assignee Performance</div>
+  <div class="tc" style="margin-bottom:18px"><div class="th"><div class="tt">Team / Assignee Analytics</div></div>
+    <table><thead><tr><th>#</th><th>Assignee</th><th>Total</th><th>Resolved</th><th>Open</th><th>SLA Issues</th><th>Avg Res Time</th><th>Resolution Rate</th><th>Performance</th></tr></thead><tbody id="tb1"></tbody></table></div>
+  <div class="sl">🚨 SLA Breach Detector</div>
+  <div class="tc"><div class="th"><div class="tt">⚠️ Breached & At-Risk Tickets</div><span id="bc" style="font-size:11px;color:var(--r);font-weight:600"></span></div>
+    <table><thead><tr><th>Ticket ID</th><th>Summary</th><th>Priority</th><th>Status</th><th>Assignee</th><th>Created</th><th>Res Time</th><th>SLA Status</th></tr></thead><tbody id="tb2"></tbody></table></div>
+  <div class="sl" style="margin-top:18px">📋 All Tickets</div>
+  <div class="tc"><div class="th"><div class="tt">Complete Ticket List</div>
+    <div style="display:flex;gap:6px">
+      <select id="fp" onchange="renderTT()"><option value="">All Priorities</option><option>P1</option><option>P2</option><option>P3</option><option>P4</option></select>
+      <select id="fs" onchange="renderTT()"><option value="">All Status</option><option>Open</option><option>In Progress</option><option>Resolved</option></select>
+      <select id="fa" onchange="renderTT()"><option value="">All Assignees</option></select>
+    </div></div>
+    <table><thead><tr><th>ID</th><th>Summary</th><th>Type</th><th>Priority</th><th>Status</th><th>Assignee</th><th>Created</th><th>Res Time</th><th>SLA</th></tr></thead><tbody id="tb3"></tbody></table></div>
+</div>
+
+<footer>Built by <a href="https://github.com/vidyachoki" target="_blank">Vidya Rani</a> — Production Support Engineer & AI Automation Specialist &nbsp;|&nbsp; <a href="https://www.linkedin.com/in/vidya-rani-b31a06358" target="_blank">LinkedIn</a> &nbsp;|&nbsp; <a href="https://github.com/vidyachoki" target="_blank">GitHub</a></footer>
+
+<script>
+const JIRA_DATA=[{"id": "PS-8347", "title": "2 client IDs showing up in reg review", "priority": "P3", "raw_priority": "Minor", "status": "Open", "raw_status": "Acknowledged", "type": "Product Support Bug", "assignee": "Guillermo Poggioni", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 0}, {"id": "PSH-73", "title": "Unable to update paused survey (62376) - Getting Error message when trying to save", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "In Progress", "type": "PS Bug", "assignee": "Arpan Maheshwari", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": 71.6, "sla_breach": true, "sla_risk": false, "days_ago": 0}, {"id": "PSH-72", "title": "Crowds list fails to load - blocking quota modification (BLOCKER)", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "In Progress", "type": "PS Request", "assignee": "Franco Payola", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": 71.4, "sla_breach": true, "sla_risk": false, "days_ago": 0}, {"id": "PSH-71", "title": "Investigation Logs spike from jun 14 to 16 in Papertrail", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "In Progress", "type": "PS Request", "assignee": "Sunil Paramesh", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": 69.8, "sla_breach": true, "sla_risk": false, "days_ago": 0}, {"id": "PS-8345", "title": "Enhanced has confusing/conflicting language about file size requirements for images", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 0}, {"id": "PSH-70", "title": "Profile overview data source discrepancy", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "PS Bug", "assignee": "Guillermo Poggioni", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": 56.3, "sla_breach": true, "sla_risk": false, "days_ago": 0}, {"id": "PS-8343", "title": "Who has referral description rED9m", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 0}, {"id": "PS-8342", "title": "Referral link used for the registration or not", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 0}, {"id": "PS-8341", "title": "Could we delete/archive all the test surveys in ADELPHI-03 sub?", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 0}, {"id": "PS-8340", "title": "Unrecognized Rewards Redemption - ID 2878020", "priority": "P3", "raw_priority": "Minor", "status": "Open", "raw_status": "Acknowledged", "type": "Product Support Bug", "assignee": "Franco Payola", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 0}, {"id": "PS-8339", "title": "Bulk status update is not working in survey level", "priority": "P2", "raw_priority": "Major", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 0}, {"id": "PS-8338", "title": "Requesting Access to Incrowd/Iris portals of Qual-QA, Data-QA, and Web-QA Environments", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Sunil Paramesh", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 0}, {"id": "PSH-68", "title": "Registration Review list: Filter export & Recruitment details sorting", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "In Progress", "type": "PS Bug", "assignee": "Sunil Paramesh", "created": "18 Jun 2026", "created_month": "2026-06", "res_hours": 65.8, "sla_breach": true, "sla_risk": false, "days_ago": 0}, {"id": "PS-8337", "title": "Login not accepted for TAINA - PW reset email not recognized", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "17 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 1}, {"id": "PS-8334", "title": "IRIS Bid Configurator - Other Fees Affecting Cost", "priority": "P2", "raw_priority": "Major", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "17 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 1}, {"id": "PS-8333", "title": "IRIS Access - Production", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Franco Payola", "created": "17 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 1}, {"id": "PSH-66", "title": "Attach PJ to survey number", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "PS Request", "assignee": "Vidya Rani", "created": "16 Jun 2026", "created_month": "2026-06", "res_hours": 45.8, "sla_breach": true, "sla_risk": false, "days_ago": 2}, {"id": "PS-8331", "title": "PayPal Redemption visible in IRIS with No Corresponding Transaction in PayPal", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "16 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 2}, {"id": "PS-8330", "title": "Not able to access self-service qual projects", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Franco Payola", "created": "16 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 2}, {"id": "PS-8329", "title": "Require access to Feasbility", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Franco Payola", "created": "16 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 2}, {"id": "PS-8328", "title": "Edit profile not working", "priority": "P2", "raw_priority": "Major", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "16 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 2}, {"id": "PSH-64", "title": "UK region request.", "priority": "P3", "raw_priority": "Unassigned", "status": "Resolved", "raw_status": "Closed", "type": "Data Request", "assignee": "Franco Payola", "created": "16 Jun 2026", "created_month": "2026-06", "res_hours": 59.9, "sla_breach": true, "sla_risk": false, "days_ago": 2}, {"id": "PSH-63", "title": "Confirm / Fix Show-If Logic for Q37 NP/PA OMA Certification", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Closed", "type": "PS Request", "assignee": "Guillermo Poggioni", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": 48.7, "sla_breach": true, "sla_risk": false, "days_ago": 3}, {"id": "PSH-61", "title": "Open ended question not showing", "priority": "P2", "raw_priority": "Major", "status": "In Progress", "raw_status": "Sent to Dev", "type": "PS Request", "assignee": "Vidya Rani", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": 25.8, "sla_breach": true, "sla_risk": false, "days_ago": 3}, {"id": "PSH-60", "title": "Request: Restore Credits Deducted for survey", "priority": "P3", "raw_priority": "Minor", "status": "Open", "raw_status": "Needs More Information", "type": "PS Request", "assignee": "Vidya Rani", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": 36.8, "sla_breach": true, "sla_risk": false, "days_ago": 3}, {"id": "PS-8327", "title": "I should be able to upload a video file to the Concept Test module in teh same way I can upload a vi", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Vidya Rani", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 3}, {"id": "PS-8326", "title": "Assistance in Validating MongoDB query for payable answers by user survey id", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 3}, {"id": "PS-8325", "title": "60984 dupe check", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 3}, {"id": "PSH-59", "title": "Optometry Internal Feas Missing", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "Sent to Dev", "type": "PS Bug", "assignee": "Sunil Paramesh", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": 46.4, "sla_breach": true, "sla_risk": false, "days_ago": 3}, {"id": "PS-8324", "title": "Survey 62328.. Logic for Charts (C1 to C5) when selecting S7: MM Patient Treatment with SVd / Sd  [S", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Franco Payola", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 3}, {"id": "PSH-58", "title": "Crowd not adding to survey", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Closed", "type": "PS Bug", "assignee": "Franco Payola", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": 43.1, "sla_breach": true, "sla_risk": false, "days_ago": 3}, {"id": "PS-8323", "title": "Access to feasibility in Iris", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Sunil Paramesh", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 3}, {"id": "PSH-57", "title": "Unable to update member profile to pharmacist", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "In Progress", "type": "PS Bug", "assignee": "Sunil Paramesh", "created": "15 Jun 2026", "created_month": "2026-06", "res_hours": 41.8, "sla_breach": true, "sla_risk": false, "days_ago": 3}, {"id": "PS-8322", "title": "Enhanced Survey 60605: Can't apply filters to grid questions", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "12 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 6}, {"id": "PS-8320", "title": "For subscription MEN\u2011EU\u201101, when creating a survey, the Salesforce project number is not being autom", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Sunil Paramesh", "created": "12 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 6}, {"id": "PSH-55", "title": "Add User to Assigned Fieldwork Manager Field", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "SF Task", "assignee": "Sunil Paramesh", "created": "12 Jun 2026", "created_month": "2026-06", "res_hours": 23.2, "sla_breach": false, "sla_risk": true, "days_ago": 6}, {"id": "PSH-53", "title": "Incorrect calculation of credits used in Platform", "priority": "P2", "raw_priority": "Major", "status": "In Progress", "raw_status": "Sent to Dev", "type": "PS Bug", "assignee": "Arpan Maheshwari", "created": "11 Jun 2026", "created_month": "2026-06", "res_hours": 9.8, "sla_breach": true, "sla_risk": false, "days_ago": 7}, {"id": "PS-8319", "title": "Force launch surveys", "priority": "P2", "raw_priority": "Major", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Request", "assignee": "Franco Payola", "created": "11 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 7}, {"id": "PSH-52", "title": "need a count of all members in each laboratory title for US laboratory professionals", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Closed", "type": "Data Request", "assignee": "Franco Payola", "created": "11 Jun 2026", "created_month": "2026-06", "res_hours": 40.4, "sla_breach": true, "sla_risk": false, "days_ago": 7}, {"id": "PSH-51", "title": "Test", "priority": "P3", "raw_priority": "Unassigned", "status": "Resolved", "raw_status": "Closed", "type": "PS Bug", "assignee": "Unassigned", "created": "11 Jun 2026", "created_month": "2026-06", "res_hours": 68.4, "sla_breach": true, "sla_risk": false, "days_ago": 7}, {"id": "PS-8317", "title": "Text Entry questions with multiple entries are not displaying them correctly in globalized surveys", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Bug", "assignee": "Franco Payola", "created": "11 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 7}, {"id": "PS-8316", "title": "IWIK/Adelphi bug - Viewer access to all countries in a globalized project", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Bug", "assignee": "Franco Payola", "created": "11 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 7}, {"id": "PS-8315", "title": "Opt back into email and remove from comm opt outs", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "11 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 7}, {"id": "PS-8314", "title": "QS Tool Access", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Sunil Paramesh", "created": "11 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 7}, {"id": "PS-8313", "title": "QBrowserFingerPrintr2 Errors \u2013 Possible RouterLog DB Capacity Issue", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Franco Payola", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 8}, {"id": "PSH-50", "title": "laboratory titles not included in AUS export", "priority": "P3", "raw_priority": "Unassigned", "status": "Open", "raw_status": "Pending Review", "type": "PS Request", "assignee": "Sunil Paramesh", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": 23.1, "sla_breach": false, "sla_risk": true, "days_ago": 8}, {"id": "PSH-49", "title": "Translated Survey Preview Links are presenting in English instead of the translated language.", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Closed", "type": "PS Bug", "assignee": "Arpan Maheshwari", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": 59.7, "sla_breach": true, "sla_risk": false, "days_ago": 8}, {"id": "PSH-48", "title": "Crowds Not Adding to Survey #61192", "priority": "P2", "raw_priority": "Major", "status": "In Progress", "raw_status": "Sent to Dev", "type": "PS Bug", "assignee": "Franco Payola", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": -1.1, "sla_breach": false, "sla_risk": true, "days_ago": 8}, {"id": "PS-8312", "title": "Simona Vilkaite is locked out of QS tool.", "priority": "P1", "raw_priority": "Blocker", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Sunil Paramesh", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 8}, {"id": "PSH-47", "title": "Failure to react to receiving \u201cWants to Participate\u201d = No from Doximity on Survey 61752, Crowd 16164", "priority": "P2", "raw_priority": "Major", "status": "In Progress", "raw_status": "Sent to Dev", "type": "PS Bug", "assignee": "Arpan Maheshwari", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": -2.2, "sla_breach": false, "sla_risk": true, "days_ago": 8}, {"id": "PS-8311", "title": "Welcome emails don't see to be getting to Viewer users in Adelphi-03 sub", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 8}, {"id": "PSH-45", "title": "Wrong User status shown - Can't invalidate user", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "In Progress", "type": "PS Bug", "assignee": "Sunil Paramesh", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": 18.3, "sla_breach": false, "sla_risk": true, "days_ago": 8}, {"id": "PS-8310", "title": "Missing Transcripts", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "10 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 8}, {"id": "PSH-42", "title": "Investigate sudden spike in Papertrail logs on June 2nd", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "In Progress", "type": "PS Request", "assignee": "Sunil Paramesh", "created": "09 Jun 2026", "created_month": "2026-06", "res_hours": 11.6, "sla_breach": false, "sla_risk": true, "days_ago": 9}, {"id": "PS-8308", "title": "Cannot remove team member", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "08 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 10}, {"id": "PS-8307", "title": "Force launch", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "08 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 10}, {"id": "PS-8306", "title": "Technical issue", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "08 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 10}, {"id": "PS-8304", "title": "60984 dupe check", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "08 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 10}, {"id": "PS-8303", "title": "I\u2019ve created subscription 37101 for internal use, but the checkbox at the bottom \u2014 \u201cDo not require S", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "08 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 10}, {"id": "PSH-32", "title": "# of Languages is reflecting the wrong # of languages", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "Sent to Dev", "type": "PS Bug", "assignee": "Arpan Maheshwari", "created": "05 Jun 2026", "created_month": "2026-06", "res_hours": 0.1, "sla_breach": false, "sla_risk": true, "days_ago": 13}, {"id": "PSH-30", "title": "Adding Salesforce Project to SightX survey", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Closed", "type": "PS Request", "assignee": "Vidya Rani", "created": "05 Jun 2026", "created_month": "2026-06", "res_hours": 53.7, "sla_breach": true, "sla_risk": false, "days_ago": 13}, {"id": "PS-8299", "title": "Slow movement 61587", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "05 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 13}, {"id": "PSH-29", "title": "Misleading I2 notification Update", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Closed", "type": "PS Request", "assignee": "Vidya Rani", "created": "05 Jun 2026", "created_month": "2026-06", "res_hours": 12.6, "sla_breach": false, "sla_risk": false, "days_ago": 13}, {"id": "PSH-26", "title": "Crowds won't load for Survey ID 62016 and Survey preview function not working", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "PS Bug", "assignee": "Vidya Rani", "created": "04 Jun 2026", "created_month": "2026-06", "res_hours": 0.8, "sla_breach": false, "sla_risk": false, "days_ago": 14}, {"id": "PS-8297", "title": "What can we do to speed up the globalization process?", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Request", "assignee": "Franco Payola", "created": "04 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 14}, {"id": "PSH-24", "title": "When Programming LOI is customized, it is NOT showing as such in Description for Bid in Excel", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "PS Bug", "assignee": "Vidya Rani", "created": "04 Jun 2026", "created_month": "2026-06", "res_hours": 8.1, "sla_breach": false, "sla_risk": false, "days_ago": 14}, {"id": "PS-8290", "title": "Cannot attached crowd to survey 61929", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "04 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 14}, {"id": "PS-8286", "title": "Adding new crowd", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "03 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 15}, {"id": "PS-8284", "title": "Apollo QS tool Update", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Sunil Paramesh", "created": "02 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 16}, {"id": "PSH-20", "title": "Global Survey Translation Not Working - Just for one question", "priority": "P3", "raw_priority": "Unassigned", "status": "Resolved", "raw_status": "Closed", "type": "PS Bug", "assignee": "Franco Payola", "created": "02 Jun 2026", "created_month": "2026-06", "res_hours": 63.9, "sla_breach": true, "sla_risk": false, "days_ago": 16}, {"id": "PS-8276", "title": "Run Intacct vendors mapping sql script on production", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Sunil Paramesh", "created": "01 Jun 2026", "created_month": "2026-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 17}, {"id": "PS-8264", "title": "Created new Adelphi Viewer user and did not redirect me appropriately", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Bug", "assignee": "Sunil Paramesh", "created": "27 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 22}, {"id": "PSH-6", "title": "New bug, test purpose - e", "priority": "P3", "raw_priority": "Unassigned", "status": "Resolved", "raw_status": "Closed", "type": "PS Bug", "assignee": "Mahmoud Magdy", "created": "27 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 22}, {"id": "PS-8309", "title": "Need access for incrowd platform", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Sunil Paramesh", "created": "27 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 22}, {"id": "PS-8253", "title": "Investigate AI Labs automation opportunities for browser and login PS tickets", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "25 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 24}, {"id": "PS-8251", "title": "Investigate AI Labs automation opportunities for credits and PPTX PS tickets", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Guillermo Poggioni", "created": "25 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 24}, {"id": "PS-8249", "title": "Investigate AI Labs automation opportunities for recurring PS investigations", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "25 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 24}, {"id": "PS-8248", "title": "Identify recurring error logs for potential alerting - Franco", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Franco Payola", "created": "22 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 27}, {"id": "PS-8246", "title": "Identify recurring error logs for potential alerting - Vidya", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "22 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 27}, {"id": "PS-8244", "title": "Identify recurring error logs for potential alerting - Arpan", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "22 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 27}, {"id": "PS-8227", "title": "Investigate LS survey invitation sends", "priority": "P3", "raw_priority": "Unassigned", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "19 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 30}, {"id": "PS-8225", "title": "LS Specialty Incentive Update Report Request", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "19 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 30}, {"id": "PS-8208", "title": "Update Papertrail output to stop pointing to Slack", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "In Progress", "type": "Product Support Request", "assignee": "Guillermo Poggioni", "created": "14 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 35}, {"id": "PS-8173", "title": "Referral link is not working - ID 3797986", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Sunil Paramesh", "created": "07 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 42}, {"id": "PS-8172", "title": "User 3860310 reports recurring page load errors with Enhanced", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Vidya Rani", "created": "06 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 43}, {"id": "PS-8166", "title": "Cross out non-functional question types on the Enhanced 'add item' menu", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product support Feature Request", "assignee": "Vidya Rani", "created": "06 May 2026", "created_month": "2026-05", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 43}, {"id": "PS-8086", "title": "Bid List Match Exports returning members as \"Ex-Members\"", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Vidya Rani", "created": "22 Apr 2026", "created_month": "2026-04", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 57}, {"id": "PS-7926", "title": "Issue with Disabled Brand Participation Status", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "27 Mar 2026", "created_month": "2026-03", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 83}, {"id": "PS-7811", "title": "ID 2793369- not receiving survey from November", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Sunil Paramesh", "created": "11 Mar 2026", "created_month": "2026-03", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 99}, {"id": "PS-7291", "title": "Requesting Access to Incrowd/Iris portals of Qual-QA, Data-QA, and Web-QA Environments", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Vidya Rani", "created": "25 Nov 2025", "created_month": "2025-11", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 205}, {"id": "PS-6744", "title": "The Concept Test Module in Enhanced should allow a user to upload a video and NOT rely on youtube ho", "priority": "P3", "raw_priority": "Minor", "status": "In Progress", "raw_status": "Sent to Dev", "type": "Product Support Bug", "assignee": "Arpan Maheshwari", "created": "21 Aug 2025", "created_month": "2025-08", "res_hours": null, "sla_breach": false, "sla_risk": true, "days_ago": 301}, {"id": "PS-6231", "title": "Bid List Match Expected completes calculation", "priority": "P2", "raw_priority": "Major", "status": "Resolved", "raw_status": "Done", "type": "Product Support Request", "assignee": "Arpan Maheshwari", "created": "05 Jun 2025", "created_month": "2025-06", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 378}, {"id": "PS-5674", "title": "member 2094406 payment still pending for interview 45627 after completing 1/29", "priority": "P3", "raw_priority": "Minor", "status": "Resolved", "raw_status": "Done", "type": "Product Support Bug", "assignee": "Unassigned", "created": "10 Feb 2025", "created_month": "2025-02", "res_hours": null, "sla_breach": false, "sla_risk": false, "days_ago": 493}];
+
+let T=[],CH={};
+
+function sample(type){
+  const cfg={
+    mixed:{teams:['Platform','DB Team','API Team','DevOps','Frontend','Backend','QA'],types:['Bug','Incident','Service Request','Change'],cats:['Performance','Database','Auth','Network','UI Bug','API','Security']},
+    healthcare:{teams:['EHR Team','Lab Systems','Patient Portal','Billing','Pharmacy','Compliance'],types:['Clinical Bug','Incident','Data Request','Compliance'],cats:['EHR Access','Lab Results','Patient Data','Billing','System Outage']},
+    banking:{teams:['Core Banking','Payments','Fraud','Mobile','ATM','Compliance'],types:['Transaction Bug','Outage','Security Alert','Compliance'],cats:['Transaction Fail','Account Access','Fraud Alert','Payment Gateway','System Outage']}
+  };
+  const c=cfg[type]||cfg.mixed;
+  const ps=['P1','P1','P2','P2','P3','P3','P3','P4'],ss=['Open','Open','In Progress','In Progress','Resolved','Resolved'],ms=['2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'];
+  const data=[];
+  for(let i=1;i<=100;i++){
+    const p=ps[Math.floor(Math.random()*ps.length)],s=ss[Math.floor(Math.random()*ss.length)];
+    const m=ms[Math.floor(Math.random()*ms.length)],da=Math.floor(Math.random()*180);
+    const sh={P1:2,P2:8,P3:24,P4:72},rh=s==='Resolved'?Math.floor(Math.random()*96)+1:null;
+    data.push({id:`TKT-${String(i).padStart(4,'0')}`,title:c.cats[Math.floor(Math.random()*c.cats.length)]+' issue',priority:p,raw_priority:p,status:s,raw_status:s,type:c.types[Math.floor(Math.random()*c.types.length)],assignee:c.teams[Math.floor(Math.random()*c.teams.length)],created:'01 '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m.split('-')[1])-1]+' '+m.split('-')[0],created_month:m,res_hours:rh,sla_breach:rh&&rh>sh[p],sla_risk:!rh&&da>sh[p]/24,days_ago:da});
+  }
+  return data;
+}
+
+function handleFile(e){const f=e.target.files[0];if(f)readF(f);}
+function dropF(e){const f=e.dataTransfer.files[0];if(f)readF(f);}
+function readF(f){showL('Reading file...');const r=new FileReader();r.onload=ev=>parseCSV(ev.target.result,f.name);r.readAsText(f);}
+
+function parseCSV(txt,fname){
+  showL('Parsing CSV...');
+  setTimeout(()=>{
+    const lines=txt.trim().split('\n');
+    const hdrs=lines[0].split(',').map(h=>h.trim().replace(/^[\uFEFF"]+|["]+$/g,'').toLowerCase());
+    const fi=(...t)=>hdrs.findIndex(h=>t.some(x=>h.includes(x)));
+    const cols={id:fi('issue key','ticket id','key','number'),title:fi('summary','title','subject'),type:fi('issue type','type'),priority:fi('priority','severity'),status:fi('status','state'),assignee:fi('assignee','owner','agent'),created:fi('created','creation','opened'),res:fi('time to resolution','resolution time','time spent')};
+
+    const tks=[];
+    for(let i=1;i<lines.length;i++){
+      if(!lines[i].trim())continue;
+      const row=parseRow(lines[i]);
+      const g=idx=>idx>=0&&idx<row.length?row[idx].trim():'';
+      // Only accept rows with valid ticket ID (e.g. PS-123, INC-456)
+      const tid=g(cols.id);
+      if(!tid||!tid.includes('-'))continue;
+      const p=nP(g(cols.priority)),s=nS(g(cols.status));
+      const cr=g(cols.created),cm=pMonth(cr),da=pDays(cr);
+      const rh=pRes(g(cols.res));
+      const sh={P1:2,P2:8,P3:24,P4:72};
+      tks.push({id:tid,title:(g(cols.title)||'Ticket').substring(0,100),type:g(cols.type)||'General',priority:p,raw_priority:g(cols.priority),status:s,raw_status:g(cols.status),assignee:g(cols.assignee)||'Unassigned',created:fmtD(cr),created_month:cm,res_hours:rh,sla_breach:rh&&rh>(sh[p]||24),sla_risk:!rh&&s!=='Resolved'&&da>(sh[p]||24)/24,days_ago:da});
+    }
+    T=tks;hideL();
+    document.getElementById('ds').textContent=`Loaded: ${fname} — ${tks.length} tickets`;
+    buildDash();
+  },500);
+}
+
+function parseRow(line){
+  const r=[];let cur='',q=false;
+  for(let i=0;i<line.length;i++){if(line[i]==='"'){q=!q;}else if(line[i]===','&&!q){r.push(cur);cur='';}else{cur+=line[i];}}
+  r.push(cur);return r;
+}
+
+function nP(p){if(!p)return'P3';const u=p.toUpperCase();if(u.includes('BLOCKER')||u.includes('CRITICAL')||u==='P1'||u==='1')return'P1';if(u.includes('MAJOR')||u.includes('HIGH')||u==='P2'||u==='2')return'P2';if(u.includes('MINOR')||u.includes('MEDIUM')||u==='P3'||u==='3'||u==='UNASSIGNED')return'P3';if(u.includes('LOW')||u==='P4'||u==='4')return'P4';return'P3';}
+function nS(s){if(!s)return'Open';const u=s.toLowerCase();if(['done','closed','resolved','fixed','completed'].some(x=>u.includes(x)))return'Resolved';if(['progress','working','sent to dev','assigned','review'].some(x=>u.includes(x)))return'In Progress';return'Open';}
+function pMonth(d){if(!d)return'2026-06';let m=d.match(/(\d{1,2})\/([A-Za-z]{3})\/(\d{2,4})/);if(m){const mo={jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};return`${m[3].length===2?'20'+m[3]:m[3]}-${mo[m[2].toLowerCase()]||'01'}`;}m=d.match(/(\d{4})-(\d{2})/);return m?`${m[1]}-${m[2]}`:'2026-06';}
+function pDays(d){if(!d)return 30;try{const m=d.match(/(\d{1,2})\/([A-Za-z]{3})\/(\d{2,4})/);if(m){const mo={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};const yr=m[3].length===2?2000+parseInt(m[3]):parseInt(m[3]);return Math.max(0,Math.floor((Date.now()-new Date(yr,mo[m[2]],parseInt(m[1])).getTime())/86400000));}const dd=new Date(d);if(!isNaN(dd))return Math.max(0,Math.floor((Date.now()-dd.getTime())/86400000));}catch(e){}return 30;}
+function fmtD(d){if(!d)return'';const m=d.match(/(\d{1,2})\/([A-Za-z]{3})\/(\d{2,4})/);return m?`${m[1]} ${m[2]} ${m[3].length===2?'20'+m[3]:m[3]}`:d.substring(0,10);}
+function pRes(s){if(!s||!s.trim())return null;const m=s.match(/^(\d+):(\d+)/);if(m){const h=parseInt(m[1]);return h>8760?null:Math.round((h+parseInt(m[2])/60)*10)/10;}const n=parseFloat(s);return(!isNaN(n)&&n<8760)?n:null;}
+
+function loadSample(t){showL('Generating sample...');setTimeout(()=>{T=sample(t);const lb={mixed:'Mixed Industries',healthcare:'Healthcare',banking:'Banking'};document.getElementById('ds').textContent=`Loaded: ${lb[t]} Sample — 100 tickets`;hideL();buildDash();},500);}
+
+function buildDash(){
+  document.getElementById('up').style.display='none';
+  document.getElementById('dash').style.display='block';
+  document.getElementById('resetBtn').style.display='block';
+
+  const tot=T.length,res=T.filter(t=>t.status==='Resolved').length,opn=T.filter(t=>t.status!=='Resolved').length;
+  const br=T.filter(t=>t.sla_breach).length,ri=T.filter(t=>t.sla_risk).length;
+  const p1=T.filter(t=>t.priority==='P1').length;
+  const rts=T.filter(t=>t.res_hours).map(t=>t.res_hours);
+  const avg=rts.length?Math.round(rts.reduce((a,b)=>a+b,0)/rts.length):0;
+
+  document.getElementById('k1').textContent=tot;
+  document.getElementById('k2').textContent=res;document.getElementById('k2s').textContent=Math.round(res/tot*100)+'% resolution rate';
+  document.getElementById('k3').textContent=opn;
+  document.getElementById('k4').textContent=br+ri;document.getElementById('k4s').textContent=br+' breached, '+ri+' at risk';
+  document.getElementById('k5').textContent=p1;
+  document.getElementById('k6').textContent=avg+'h';
+
+  renderInsights(tot,res,opn,br,ri,p1,avg);
+  renderCharts();renderTeam();renderSLA(br,ri);renderTT();
+  const as=[...new Set(T.map(t=>t.assignee))].sort();
+  document.getElementById('fa').innerHTML='<option value="">All Assignees</option>'+as.map(a=>`<option>${a}</option>`).join('');
+}
+
+function renderInsights(tot,res,opn,br,ri,p1,avg){
+  const rp=Math.round(res/tot*100),bp=Math.round((br+ri)/tot*100),ins=[];
+  ins.push(rp>=70?{cl:'g',i:'✅',t:`${rp}% Resolution Rate — Strong`,x:`${res} of ${tot} tickets resolved. Team performing well above average.`}:rp>=50?{cl:'w',i:'⚠️',t:`${rp}% Resolution Rate — Needs Attention`,x:`${opn} tickets still open. Focus on clearing backlog starting with P2 tickets.`}:{cl:'d',i:'🚨',t:`${rp}% Resolution Rate — Critical`,x:`Only ${rp}% resolved. ${opn} tickets pending. Immediate prioritization required.`});
+  ins.push(bp>20?{cl:'d',i:'🔴',t:'High SLA Breach Rate',x:`${br} tickets breached SLA, ${ri} at risk. Escalate to management and review process gaps.`}:bp>10?{cl:'w',i:'⚠️',t:'SLA Breach Risk Detected',x:`${br} breached, ${ri} at risk. Assign extra resources to at-risk tickets before they breach.`}:{cl:'g',i:'✅',t:'SLA Compliance Good',x:`Only ${bp}% SLA issues. Maintain current adherence practices.`});
+  ins.push(p1>tot*0.15?{cl:'d',i:'🚨',t:`High P1 Volume: ${p1} Critical`,x:`${Math.round(p1/tot*100)}% are critical. Investigate root causes and apply RCA on each P1.`}:avg>48?{cl:'w',i:'⏱️',t:`Avg Resolution ${avg}h — Above Target`,x:`Target is under 24h for P3. Review slow tickets for bottlenecks.`}:{cl:'g',i:'📊',t:'Ticket Mix Healthy',x:`${p1} P1 tickets (${Math.round(p1/tot*100)}%). Avg resolution ${avg}h. Continue RCA practices.`});
+  document.getElementById('ig').innerHTML=ins.map(i=>`<div class="ic ${i.cl}"><div class="ii">${i.i}</div><div class="it">${i.t}</div><div class="ix">${i.x}</div></div>`).join('');
+}
+
+function renderCharts(){
+  Object.values(CH).forEach(c=>{try{c.destroy();}catch(e){}});CH={};
+  const co=(yl)=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(42,58,85,0.4)'},ticks:{color:'#64748b',font:{size:10}}},y:{grid:{color:'rgba(42,58,85,0.4)'},ticks:{color:'#64748b',font:{size:10}}}}});
+  const po=()=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',padding:8,font:{size:10}}}}});
+  const mo2l=m=>{try{const[y,mn]=m.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mn)-1]+' '+y.slice(2);}catch(e){return m;}};
+
+  const mm={};T.forEach(t=>{if(t.created_month&&t.created_month.includes('-'))mm[t.created_month]=(mm[t.created_month]||0)+1;});
+  const mths=Object.keys(mm).sort().slice(-10);
+  CH.c1=new Chart(document.getElementById('c1'),{type:'line',data:{labels:mths.map(mo2l),datasets:[{label:'Tickets',data:mths.map(m=>mm[m]),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',tension:0.4,fill:true,pointBackgroundColor:'#3b82f6',pointRadius:4}]},options:co()});
+
+  const pc={P1:0,P2:0,P3:0,P4:0};T.forEach(t=>pc[t.priority]=(pc[t.priority]||0)+1);
+  CH.c2=new Chart(document.getElementById('c2'),{type:'doughnut',data:{labels:['P1 Critical','P2 High','P3 Medium','P4 Low'],datasets:[{data:[pc.P1,pc.P2,pc.P3,pc.P4],backgroundColor:['#ef4444','#f59e0b','#3b82f6','#94a3b8'],borderWidth:0}]},options:po()});
+
+  const sc={'Open':0,'In Progress':0,'Resolved':0};T.forEach(t=>sc[t.status]=(sc[t.status]||0)+1);
+  CH.c3=new Chart(document.getElementById('c3'),{type:'pie',data:{labels:Object.keys(sc),datasets:[{data:Object.values(sc),backgroundColor:['#f59e0b','#3b82f6','#10b981'],borderWidth:0}]},options:po()});
+
+  const br=T.filter(t=>t.sla_breach).length,ri=T.filter(t=>t.sla_risk).length,ok=T.length-br-ri;
+  CH.c4=new Chart(document.getElementById('c4'),{type:'bar',data:{labels:['Compliant','At Risk','Breached'],datasets:[{data:[ok,ri,br],backgroundColor:['#10b981','#f59e0b','#ef4444'],borderRadius:5,borderWidth:0}]},options:co()});
+
+  const tc={};T.forEach(t=>tc[t.type]=(tc[t.type]||0)+1);
+  const top=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  CH.c5=new Chart(document.getElementById('c5'),{type:'bar',data:{labels:top.map(t=>t[0].length>16?t[0].slice(0,16)+'…':t[0]),datasets:[{data:top.map(t=>t[1]),backgroundColor:'#8b5cf6',borderRadius:5,borderWidth:0}]},options:{...co(),indexAxis:'y'}});
+}
+
+function renderTeam(){
+  const m={};
+  T.forEach(t=>{if(!m[t.assignee])m[t.assignee]={tot:0,res:0,opn:0,br:0,rt:[]};m[t.assignee].tot++;if(t.status==='Resolved')m[t.assignee].res++;else m[t.assignee].opn++;if(t.sla_breach||t.sla_risk)m[t.assignee].br++;if(t.res_hours)m[t.assignee].rt.push(t.res_hours);});
+  const sorted=Object.entries(m).sort((a,b)=>b[1].tot-a[1].tot);
+  document.getElementById('tb1').innerHTML=sorted.map(([n,d],i)=>{
+    const r=Math.round(d.res/d.tot*100),avg=d.rt.length?Math.round(d.rt.reduce((a,b)=>a+b,0)/d.rt.length):null;
+    const col=r>=70?'#10b981':r>=50?'#f59e0b':'#ef4444',perf=r>=70?'bok':r>=50?'brk':'bbr',pl=r>=70?'Good':r>=50?'Average':'Needs Help';
+    return`<tr><td style="font-size:15px;font-weight:700;color:var(--t3)">${i+1}</td><td style="font-weight:600">${n}</td><td style="font-family:var(--mono);color:var(--a)">${d.tot}</td><td style="font-family:var(--mono);color:var(--g)">${d.res}</td><td style="font-family:var(--mono);color:var(--o)">${d.opn}</td><td style="font-family:var(--mono);color:var(--r)">${d.br}</td><td style="font-family:var(--mono);color:var(--c)">${avg?avg+'h':'—'}</td><td><div class="pw"><div class="pb"><div class="pf" style="width:${r}%;background:${col}"></div></div><div class="pl" style="color:${col}">${r}%</div></div></td><td><span class="bg ${perf}">${pl}</span></td></tr>`;
+  }).join('');
+}
+
+function renderSLA(br,ri){
+  const issues=T.filter(t=>t.sla_breach||t.sla_risk).sort((a,b)=>(b.sla_breach?1:0)-(a.sla_breach?1:0)||(b.days_ago||0)-(a.days_ago||0));
+  document.getElementById('bc').textContent=`${issues.length} tickets need attention`;
+  document.getElementById('tb2').innerHTML=issues.length===0
+    ?'<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--g)">✅ No SLA breaches!</td></tr>'
+    :issues.map(t=>`<tr class="${t.sla_breach?'rbr':''}"><td style="font-family:var(--mono);color:var(--a);font-size:11px">${t.id}</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.title}">${t.title}</td><td><span class="bg bp${t.priority[1]}">${t.priority}</span></td><td><span class="bg ${t.status==='Open'?'bop':t.status==='In Progress'?'bpr':'brs'}">${t.raw_status||t.status}</span></td><td style="color:var(--t2)">${t.assignee}</td><td style="font-family:var(--mono);color:var(--t3);font-size:11px">${t.created}</td><td style="font-family:var(--mono);color:var(--o);font-size:11px">${t.res_hours?t.res_hours+'h':'Pending'}</td><td><span class="bg ${t.sla_breach?'bbr':'brk'}">${t.sla_breach?'🔴 BREACHED':'⚠️ AT RISK'}</span></td></tr>`).join('');
+}
+
+function renderTT(){
+  const fp=document.getElementById('fp').value,fs=document.getElementById('fs').value,fa=document.getElementById('fa').value;
+  let f=T;if(fp)f=f.filter(t=>t.priority===fp);if(fs)f=f.filter(t=>t.status===fs);if(fa)f=f.filter(t=>t.assignee===fa);
+  document.getElementById('tb3').innerHTML=f.length===0?'<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--t3)">No tickets match filters</td></tr>':f.slice(0,100).map(t=>`<tr><td style="font-family:var(--mono);color:var(--a);font-size:11px">${t.id}</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.title}">${t.title}</td><td style="color:var(--t2);font-size:11px">${t.type}</td><td><span class="bg bp${t.priority[1]}">${t.priority}</span></td><td><span class="bg ${t.status==='Open'?'bop':t.status==='In Progress'?'bpr':'brs'}">${t.raw_status||t.status}</span></td><td style="color:var(--t2)">${t.assignee}</td><td style="font-family:var(--mono);color:var(--t3);font-size:11px">${t.created}</td><td style="font-family:var(--mono);color:var(--c);font-size:11px">${t.res_hours?t.res_hours+'h':'—'}</td><td><span class="bg ${t.sla_breach?'bbr':t.sla_risk?'brk':'bok'}">${t.sla_breach?'BREACHED':t.sla_risk?'AT RISK':'OK'}</span></td></tr>`).join('');
+}
+
+function exportCSV(){
+  const h=['ID','Title','Type','Priority','Status','Assignee','Created','Res Hours','SLA'];
+  const r=T.map(t=>[t.id,`"${(t.title||'').replace(/"/g,'')}"`,t.type,t.priority,t.status,t.assignee,t.created,t.res_hours||'',t.sla_breach?'BREACHED':t.sla_risk?'AT RISK':'OK']);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[h,...r].map(x=>x.join(',')).join('\n')],{type:'text/csv'}));a.download=`incident-report-${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+function resetDash(){T=[];Object.values(CH).forEach(c=>{try{c.destroy();}catch(e){}});CH={};document.getElementById('up').style.display='block';document.getElementById('dash').style.display='none';document.getElementById('resetBtn').style.display='none';document.getElementById('fileInput').value='';}
+function showL(t){document.getElementById('lt').textContent=t;document.getElementById('lo').classList.add('on');}
+function hideL(){document.getElementById('lo').classList.remove('on');}
+
+// Auto-load JIRA data
+if(typeof JIRA_DATA!=='undefined'&&JIRA_DATA.length){T=JIRA_DATA;document.getElementById('ds').textContent=`Loaded: Your JIRA Export — ${JIRA_DATA.length} tickets analyzed`;buildDash();}
+</script></body></html>
